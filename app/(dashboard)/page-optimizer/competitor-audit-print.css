@@ -1,0 +1,240 @@
+/**
+ * Temporary capture styles for competitor audit PDF export (html2canvas).
+ * Applied via `.print-mode` on `#competitor-audit-report` during export only.
+ * Export always runs in light mode (dark class removed during capture).
+ */
+
+.print-mode.competitor-audit-report,
+.print-mode.competitor-audit-report .rounded-xl {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+
+.print-mode.competitor-audit-report h2,
+.print-mode.competitor-audit-report h3,
+.print-mode.competitor-audit-report p,
+.print-mode.competitor-audit-report span,
+.print-mode.competitor-audit-report td,
+.print-mode.competitor-audit-report th {
+  color: inherit;
+}
+
+.print-mode .semantic-gaps-table td,
+.print-mode .semantic-gaps-table th {
+  overflow: visible !important;
+}
+
+.print-mode .semantic-gaps-table th:not(.semantic-gap-entity-col),
+.print-mode .semantic-gaps-table td:not(.semantic-gap-entity-col) {
+  width: 72px !important;
+  min-width: 72px !important;
+  max-width: 72px !important;
+}
+
+.print-mode .semantic-gaps-table th:last-child,
+.print-mode .semantic-gaps-table td:last-child {
+  width: auto !important;
+  min-width: 200px !important;
+  max-width: none !important;
+}
+
+.print-mode .executive-summary-url {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+}
+
+.print-mode .technical-comparison-table .technical-metric-col {
+  position: static !important;
+  box-shadow: none !important;
+  border-right: 0 !important;
+}
+
+.print-mode .technical-comparison-table td,
+.print-mode .technical-comparison-table th {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow: visible !important;
+}
+
+.print-mode .executive-summary-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 1rem !important;
+}
+
+.print-mode .executive-summary-scores {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 1rem !important;
+}
+
+.print-mode .semantic-gaps-table,
+.print-mode .semantic-gaps-table table {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+.print-mode .semantic-gaps-table .competitor-audit-table {
+  overflow: visible !important;
+}
+
+.print-mode .semantic-gap-entity-col {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow: visible !important;
+  width: auto !important;
+  min-width: 220px !important;
+  max-width: 320px !important;
+  padding-right: 16px !important;
+  position: static !important;
+  box-shadow: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  vertical-align: top !important;
+}
+
+.print-mode .semantic-gap-entity-title,
+.print-mode .semantic-gap-entity-subtitle,
+.print-mode .semantic-gap-entity-col p {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.35 !important;
+  max-width: none !important;
+  height: auto !important;
+  -webkit-line-clamp: unset !important;
+  display: block !important;
+}
+
+.print-mode .semantic-gaps-table tr.gap-row,
+.print-mode .semantic-gaps-table tr.gap-row td,
+.print-mode .semantic-gaps-table tr.gap-row th {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.print-mode .semantic-gaps-table th.semantic-gap-entity-col {
+  height: auto !important;
+  min-height: 2.5rem !important;
+}
+
+.print-mode .semantic-gaps-table td.semantic-gap-entity-col {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+.print-mode .semantic-gap-entity-subtitle {
+  margin-top: 4px !important;
+}
+
+.print-mode .icon-success {
+  color: #16a34a !important;
+  background-color: #dcfce7 !important;
+  stroke: #16a34a !important;
+  fill: #dcfce7 !important;
+  opacity: 1 !important;
+}
+
+.print-mode .icon-error {
+  color: #dc2626 !important;
+  background-color: #fee2e2 !important;
+  stroke: #dc2626 !important;
+  fill: #fee2e2 !important;
+  opacity: 1 !important;
+}
+
+.print-mode .icon-neutral {
+  color: #4b5563 !important;
+  background-color: #f3f4f6 !important;
+  stroke: #4b5563 !important;
+  fill: #f3f4f6 !important;
+  opacity: 1 !important;
+}
+
+.print-mode .icon-success svg,
+.print-mode .icon-success svg path,
+.print-mode .icon-success svg line {
+  stroke: #16a34a !important;
+  stroke-width: 3px !important;
+  fill: none !important;
+  display: block !important;
+}
+
+.print-mode .icon-error svg,
+.print-mode .icon-error svg path,
+.print-mode .icon-error svg line {
+  stroke: #dc2626 !important;
+  stroke-width: 3px !important;
+  fill: none !important;
+  display: block !important;
+}
+
+.print-mode .icon-neutral svg,
+.print-mode .icon-neutral svg path,
+.print-mode .icon-neutral svg line {
+  stroke: #4b5563 !important;
+  stroke-width: 3px !important;
+  fill: none !important;
+  display: block !important;
+}
+
+.print-mode .pdf-icon-fallback {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+.print-mode .icon-success .pdf-icon-fallback {
+  color: #16a34a !important;
+}
+
+.print-mode .icon-error .pdf-icon-fallback {
+  color: #dc2626 !important;
+}
+
+.print-mode .icon-neutral .pdf-icon-fallback {
+  color: #4b5563 !important;
+}
+
+.print-mode .pdf-icon-svg {
+  display: none !important;
+}
+
+.pdf-icon-fallback {
+  display: none;
+}
+
+.print-mode .technical-comparison-url-cell {
+  word-break: break-all !important;
+  white-space: normal !important;
+  vertical-align: top !important;
+}
+
+.print-mode .technical-comparison-url-row td,
+.print-mode .technical-comparison-url-row th {
+  vertical-align: top !important;
+}
+
+.print-mode tr,
+.print-mode .strategy-box,
+.print-mode .gap-row {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+}
+
+.print-mode [class*='bg-white/10'] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  opacity: 1 !important;
+}

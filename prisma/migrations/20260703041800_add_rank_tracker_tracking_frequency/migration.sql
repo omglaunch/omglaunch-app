@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "RankTrackerKeyword" ADD COLUMN "trackingFrequency" TEXT NOT NULL DEFAULT 'WEEKLY';
+ALTER TABLE "RankTrackerKeyword" ADD COLUMN "nextCheckAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;

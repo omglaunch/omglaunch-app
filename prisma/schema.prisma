@@ -1,0 +1,989 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Legacy models — retained during migration; superseded by *History models
+// ---------------------------------------------------------------------------
+
+model PageAudit {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  url           String
+  targetKeyword String
+  geoScore      Float
+  auditData     Json
+}
+
+model RankTracking {
+  id              Int      @id @default(autoincrement())
+  checkedAt       DateTime @default(now())
+  keyword         String
+  engine          String
+  currentPosition Int
+  volume          Int
+}
+
+model ContentDraft {
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @updatedAt
+  title     String
+  bodyText  String
+  seoScore  Int
+}
+
+model ContentBrief {
+  id            Int       @id @default(autoincrement())
+  targetKeyword String
+  targetUrl     String
+  content       String
+  createdAt     DateTime  @default(now())
+  articles      Article[]
+}
+
+model Article {
+  id        Int          @id @default(autoincrement())
+  briefId   Int          @unique
+  brief     ContentBrief @relation(fields: [briefId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model HubSpokeMap {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  seedKeyword String
+  location    String   @default("Malaysia")
+  mapData     Json
+}
+
+// ---------------------------------------------------------------------------
+// Topical Authority Studio — structured pillar + cluster persistence
+// ---------------------------------------------------------------------------
+
+model TopicalMap {
+  id               String        @id @default(cuid())
+  seedKeyword      String
+  location         String        @default("Malaysia")
+  createdAt        DateTime      @default(now())
+  workspaceId      String        @default("default-workspace")
+  source           String        @default("HUB_SPOKE") // HUB_SPOKE | COMPETITOR_INTEL
+  competitorDomain String?
+  coreNiche        String?
+  semanticGaps     Json?
+  keywordsAnalyzed Int?
+  pillarTitle      String
+  pillarKeyword    String
+  pillarSummary    String
+  pillarCta        String
+  clusters         ClusterNode[]
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([workspaceId, source, createdAt(sort: Desc)])
+}
+
+model ClusterNode {
+  id                  String     @id @default(cuid())
+  mapId               String
+  map                 TopicalMap @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  articleTitle        String
+  keyword             String
+  intent              String
+  funnelStage         String
+  suggestedAnchorText String
+  lateralLinks        Json
+  searchVolume        Int?
+  keywordDifficulty   Int?
+  status              String     @default("Draft")
+  summary             String
+  semanticEntities    Json
+  sortOrder           Int        @default(0)
+
+  @@index([mapId])
+}
+
+// ---------------------------------------------------------------------------
+// Campaigns — business/service scope for multi-project SEO management
+// ---------------------------------------------------------------------------
+
+model Campaign {
+  id                 String               @id
+  name               String
+  domain             String               @default("")
+  createdAt          DateTime             @default(now())
+  locationName       String               @default("Malaysia")
+  locationCode       Int                  @default(2458)
+  locationCoordinate String?
+  languageCode       String               @default("en")
+  deviceType         String               @default("desktop")
+  searchEngine       String               @default("google_organic")
+  businessName       String               @default("")
+  competitorDomains  Json
+}
+
+// ---------------------------------------------------------------------------
+// Rank Tracker — SERP history tied to SavedKeyword (single source of truth)
+// ---------------------------------------------------------------------------
+
+model RankTrackerHistory {
+  id                 String       @id @default(cuid())
+  savedKeywordId     String
+  savedKeyword       SavedKeyword @relation(fields: [savedKeywordId], references: [id], onDelete: Cascade)
+  position           Int
+  previousPosition   Int
+  urlFound           String       @default("")
+  rankedUrl          String?
+  competingPages     String?
+  isFeaturedSnippet  Boolean      @default(false)
+  isLocalPack        Boolean      @default(false)
+  serpFeaturesFound  Json
+  competitorRankings Json
+  checkedAt          DateTime     @default(now())
+
+  @@index([savedKeywordId, checkedAt(sort: Desc)])
+}
+
+// ---------------------------------------------------------------------------
+// Standardized tool history — Lazy Multi-Tenancy blueprint
+// ---------------------------------------------------------------------------
+
+// Category A: migrated from localStorage (lib/analysis-cache.ts)
+model SeoAnalysisHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model SemanticAnalysisHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model AnalysisAIHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+// Category A: migrated from localStorage (lib/competitor-audit-history.ts)
+model CompetitorCompareHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+// Legacy DB tools — standardized history counterparts
+model PageAuditHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model HubSpokeHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model ArticleStudioHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+// Category B: dashboard placeholders — new history to be wired in later phases
+model QueryComparisonHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model KeywordAuditHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+  country            String?
+  city               String?
+  language           String?
+  device             String?
+  searchVolume       Int?
+  keywordDifficulty  Int?
+  topCompetitors     Json?
+}
+
+model ResearchVolumesHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model SuggestedKeywordsHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model RankTrackerSnapshotHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model AIContentWriterHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+model CMSPublishingHistory {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspaceId String   @default("default-workspace")
+  identifier  String
+  resultData  Json
+}
+
+// ---------------------------------------------------------------------------
+// DataForSEO API response cache — prevents redundant external API calls
+// ---------------------------------------------------------------------------
+
+model KeywordCache {
+  id           String   @id @default(uuid())
+  queryKey     String   @unique
+  keyword      String
+  location     String
+  language     String
+  device       String   @default("desktop")
+  searchEngine String   @default("google")
+  apiResponse  Json
+  hitCount     Int      @default(0)
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+
+  @@index([expiresAt])
+}
+
+// ---------------------------------------------------------------------------
+// Keyword Manager — multi-tenant project-scoped rank tracking foundation
+// ---------------------------------------------------------------------------
+
+model Project {
+  id          String         @id @default(uuid())
+  workspaceId String
+  name        String
+  domain      String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  keywords    SavedKeyword[]
+  aeoBrandProfile AeoBrandProfile?
+  visibilityPrompts VisibilityPrompt[]
+  publishedGapArticles PublishedGapArticle[]
+  domainProfileManifest DomainProfileManifest?
+  localAuditHistories LocalAuditHistory[]
+  cronSchedules       CronSchedule[]
+  clientShareLinks    ClientShareLink[]
+
+  @@index([workspaceId])
+}
+
+/// AI Visibility matrix row — persisted citation vault per project.
+model VisibilityPrompt {
+  id                   String   @id
+  projectId            String
+  project              Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  prompt               String
+  promptCluster        String
+  aiSearchVol          Int?
+  aiSearchVolConfirmed Boolean  @default(false)
+  organicRank          Int?
+  geoTarget            String
+  geoLocationId        String?
+  geoTimezone          String   @default("America/New_York")
+  userTargetUrl        String
+  brandAliases         Json     @default("[]")
+  persistenceTrend     Json     @default("[]")
+
+  lastSyncedAt         DateTime
+  lastActionAt         DateTime
+  updatedAt            DateTime @updatedAt
+  nextCronRun          DateTime?
+
+  googleAio            Json
+  perplexity           Json
+  chatgpt              Json
+  claude               Json
+  competitorThreat     Json
+
+  rowSyncState         String   @default("idle")
+  deepScanEnabled      Boolean  @default(false)
+  suspended            Boolean  @default(false)
+  sortOrder            Int      @default(0)
+
+  createdAt            DateTime @default(now())
+
+  @@unique([projectId, prompt])
+  @@index([projectId, suspended])
+  @@index([projectId, updatedAt])
+  @@index([projectId, sortOrder])
+}
+
+/// Per-client AEO brand identity for AI Visibility (1:1 with Project).
+model AeoBrandProfile {
+  id           String   @id @default(cuid())
+  projectId    String   @unique
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  brandLabel   String
+  primaryUrl   String
+  brandAliases Json     @default("[]")
+  /// Schema.org entity type for domain manifest JSON-LD (@type).
+  entityType   String   @default("Organization")
+  /// NAP — client contact phone for manifest JSON-LD.
+  contactPhone String?
+  /// NAP — client contact email for manifest JSON-LD.
+  contactEmail String?
+  /// NAP — formatted street/mailing address for manifest JSON-LD.
+  address      String?
+  /// Profile URLs (GBP, social, Wikidata, etc.) for JSON-LD sameAs.
+  sameAsUrls   Json     @default("[]")
+  /// Last brand change that should refresh the domain manifest.
+  manifestRegenRequestedAt  DateTime?
+  /// Manifest version applied for the latest completed regen request.
+  manifestRegenCompletedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model SavedKeyword {
+  id                String               @id @default(uuid())
+  workspaceId       String
+  projectId         String
+  project           Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  keyword           String
+  location          String
+  locationCode      Int?
+  language          String
+  languageCode      String?
+  searchEngine      String               @default("google")
+  device            String               @default("desktop")
+  searchVolume      Int?
+  cpc               Float?
+  intent            String?
+  kd                Int?
+  tags              Json                 @default("[]")
+  targetUrl         String?
+  rankedUrl         String?
+  competingPages    String?
+  initialRank       Int?
+  currentRank       Int?
+  lastTrackedAt     DateTime?
+  isActive          Boolean              @default(true)
+  trackingFrequency String               @default("WEEKLY")
+  nextCheckAt       DateTime?
+  createdAt         DateTime             @default(now())
+  history           RankTrackerHistory[]
+
+  @@unique([projectId, keyword, location, language, searchEngine, device])
+  @@index([projectId])
+  @@index([workspaceId, currentRank])
+  @@index([workspaceId, projectId])
+  @@index([workspaceId, isActive, nextCheckAt])
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth — authentication (User, Session, Account, Verification)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String     @id
+  name          String
+  email         String
+  emailVerified Boolean    @default(false)
+  image         String?
+  credits       Int        @default(0)
+  hasCompletedOnboarding Boolean @default(false)
+  role          String     @default("USER") // USER | SUPPORT | ADMIN | SUPER_ADMIN
+  isActive      Boolean    @default(true)
+  byokEnabled   Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  usageLogs     UsageLog[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model UsageLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  cost      Int
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Workspace settings — tenant-scoped configuration (workspaceId = user.id)
+// ---------------------------------------------------------------------------
+
+model WorkspaceSettings {
+  id          String @id @default(cuid())
+  workspaceId String @unique
+
+  name     String @default("My Workspace")
+  primaryIndustry String @default("")
+  timezone String @default("Asia/Kuala_Lumpur")
+  theme    String @default("system") // light | dark | system
+
+  // Client portal isolation — hide metrics from Client/Viewer role
+  hideApiCostsFromViewer     Boolean @default(true)
+  hideUsageMetricsFromViewer Boolean @default(false)
+
+  // Global tracking defaults for new keyword projects
+  defaultCountry      String @default("Malaysia")
+  defaultState        String @default("")
+  defaultGoogleDomain String @default("google.com.my")
+  defaultLanguage     String @default("en")
+  defaultDevice       String @default("desktop")
+
+  // Notification thresholds
+  rankDropThreshold     Int     @default(5)
+  cannibalizationNotify Boolean @default(true)
+  emailDigestWeekly     Boolean @default(false)
+  pushToWebhook         Boolean @default(false)
+
+  // Agency & white-label
+  reportLogoUrl     String?
+  brandPrimaryColor String  @default("#2563eb")
+  customDomain      String?
+
+  // Billing placeholder
+  planName String @default("Pro Plan")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+}
+
+model AiConfig {
+  id          String @id @default(cuid())
+  workspaceId String @unique
+
+  openaiApiKey      String?
+  anthropicApiKey   String?
+  geminiApiKey      String?
+  perplexityApiKey  String?
+
+  analysisAiModel       String @default("gpt-4o-mini")
+  articleStudioModel    String @default("claude-3-5-sonnet")
+  localDominanceModel   String @default("gpt-4o-mini")
+
+  brandVoice         String @default("")
+  costAlertThreshold Float  @default(100)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+}
+
+model TeamMember {
+  id          String @id @default(cuid())
+  workspaceId String
+  userId      String?
+  email       String
+  name        String?
+  role        String  @default("VIEWER") // OWNER | ADMIN | EDITOR | VIEWER
+  status      String  @default("active") // active | invited
+  /// Client/Viewer portal: restrict to these project ids (empty = no client access for VIEWER)
+  assignedProjectIds Json @default("[]")
+  invitedAt   DateTime?
+  joinedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([workspaceId, email])
+  @@index([workspaceId])
+}
+
+model IntegrationConfig {
+  id          String @id @default(cuid())
+  workspaceId String @unique
+
+  dataForSeoLogin    String?
+  dataForSeoPassword String?
+
+  googleSearchConsoleConnected   Boolean @default(false)
+  googleAnalyticsConnected       Boolean @default(false)
+  googleBusinessProfileConnected Boolean @default(false)
+
+  googleBusinessProfileAccessToken  String?
+  googleBusinessProfileRefreshToken String?
+  googleBusinessProfileTokenExpiry  DateTime?
+  googleBusinessProfileLocationId   String?
+  googleBusinessProfileCid          String?
+
+  wordpressSiteUrl     String?
+  wordpressUsername    String?
+  wordpressAppPassword String?
+
+  webhookUrls Json @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  siloProjects SiloProject[]
+
+  @@index([workspaceId])
+}
+
+// ---------------------------------------------------------------------------
+// Silo Builder — unified keyword mapping & competitor gap analysis
+// ---------------------------------------------------------------------------
+
+model SiloProject {
+  id            String   @id @default(cuid())
+  userId        String
+  workspaceId   String
+  integrationId String?
+  title         String
+  type          String   // KEYWORD | COMPETITOR
+  domain        String?
+  seedKeyword   String?
+  geography     String?
+  niche         String?
+  semanticGaps  Json?
+  keywordsAnalyzed Int?
+  rankedKeywords Json?
+  hubGroups Json?
+  importedFromTopicalMapId String? @unique
+  /// complete | partial | failed | never
+  metricsStatus String?
+  metricsEnrichedAt DateTime?
+  metricsCompleteCount Int?
+  metricsTotalCount Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  integration IntegrationConfig? @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+  nodes       SiloNode[]
+
+  @@index([userId])
+  @@index([workspaceId, createdAt(sort: Desc)])
+}
+
+model SiloNode {
+  id                 String  @id @default(cuid())
+  projectId          String
+  title              String
+  type               String  // PILLAR | SPOKE
+  targetKeyword          String?
+  originalTargetKeyword  String?
+  keywordSource          String? // gemini | competitor | resolved | manual
+  metricsConfidence      String? // exact | resolved | unavailable
+  searchVolume           Int?
+  difficulty             Int?
+  enrichedAt             DateTime?
+  intent             String?
+  summary            String?
+  funnelStage        String?
+  anchorTextToPillar String?
+  lateralLinks       Json?
+  semanticEntities   Json?
+  status             String  @default("DRAFT") // DRAFT | QUEUED | GENERATING | COMPLETED | PUBLISHED | FAILED
+  parentId           String?
+  content            String?
+  slug               String?
+  wpPostId           Int?
+  wpPostStatus       String? // draft | publish
+  articleStudioHistoryId String?
+  publishedAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project  SiloProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent   SiloNode?   @relation("SiloNodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children SiloNode[]  @relation("SiloNodeHierarchy")
+
+  @@index([projectId])
+  @@index([parentId])
+  @@index([status])
+}
+
+model AuditLogEntry {
+  id          String   @id @default(cuid())
+  workspaceId String
+  projectId   String?
+  category    String?
+  action      String
+  actorName   String
+  actorEmail  String
+  details     String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([workspaceId, projectId, createdAt(sort: Desc)])
+  @@index([workspaceId, category, createdAt(sort: Desc)])
+}
+
+// ---------------------------------------------------------------------------
+// Super Admin — platform-wide configuration, audit, queues, integration logs
+// ---------------------------------------------------------------------------
+
+model SystemConfiguration {
+  id String @id @default("singleton")
+
+  primaryLlmModel          String @default("gemini-2.0-flash")
+  fallbackLlmModel         String @default("gpt-4o-mini")
+  inputTokenCostPerMillion  Float  @default(0.15)
+  outputTokenCostPerMillion Float  @default(0.60)
+  systemPrompt             String @default("")
+  articleStudioPrompt      String @default("")
+
+  dataForSeoEnabled        Boolean @default(true)
+  wordpressWebhooksEnabled Boolean @default(true)
+  openaiEnabled            Boolean @default(true)
+  geminiEnabled            Boolean @default(true)
+
+  dataForSeoCacheTtlHours    Int     @default(48)
+  queueModeEnabled         Boolean @default(false)
+  globalConcurrencyDelayMs Int     @default(0)
+  logRetentionDays         Int     @default(30)
+
+  masterOpenaiKey          String?
+  masterAnthropicKey       String?
+  masterGeminiKey          String?
+  masterDataForSeoLogin    String?
+  masterDataForSeoPassword String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminAuditLog {
+  id             String   @id @default(cuid())
+  adminId        String
+  actionType     String
+  targetResource String
+  previousState  Json?
+  newState       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([adminId, createdAt(sort: Desc)])
+  @@index([actionType, createdAt(sort: Desc)])
+}
+
+model BackgroundQueueTask {
+  id          String    @id @default(cuid())
+  userId      String
+  taskType    String
+  state       String    @default("RUNNING") // RUNNING | COMPLETED | FAILED | STUCK
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  metadata    Json?
+
+  @@index([state, startedAt(sort: Desc)])
+  @@index([userId])
+}
+
+model IntegrationHealthLog {
+  id              String   @id @default(cuid())
+  workspaceId     String?
+  integrationType String
+  status          String // SUCCESS | FAILURE | TIMEOUT
+  httpStatus      Int?
+  latencyMs       Int?
+  targetUrl       String?
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+
+  @@index([integrationType, createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+}
+
+model CreditAdjustmentIdempotency {
+  id        String   @id
+  adminId   String
+  userId    String
+  amount    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  @@index([adminId, userId])
+}
+
+// ---------------------------------------------------------------------------
+// Local Dominance — geogrid audits, cron schedules, service area queue
+// ---------------------------------------------------------------------------
+
+model LocalAuditHistory {
+  id          String   @id @default(cuid())
+  workspaceId String
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  shareToken  String   @unique @default(uuid())
+
+  keyword       String
+  centralLat    Float
+  centralLng    Float
+  radiusKm      Float
+  gridSize      Int
+  platform      String   @default("google") // google | bing
+  businessName  String?
+  businessCid   String?
+
+  solvScore     Float?
+  saivScore     Float?
+  gridResults   Json
+  aiVisibility  Json?
+  perplexityRecs Json?
+  gbpMetrics    Json?
+  spamRadar     Json?
+  competitorShifts Json?
+  trendData     Json?
+
+  scheduled     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([projectId, createdAt(sort: Desc)])
+  @@index([workspaceId, projectId])
+}
+
+model CronSchedule {
+  id          String   @id @default(cuid())
+  workspaceId String
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  scheduleType  String   @default("GEOGRID") // GEOGRID
+  keyword       String
+  centralLat    Float
+  centralLng    Float
+  radiusKm      Float
+  gridSize      Int
+  platform      String   @default("google")
+  businessName  String?
+  businessCid   String?
+  frequency     String   @default("WEEKLY") // DAILY | WEEKLY | MONTHLY
+  isActive      Boolean  @default(true)
+  nextRunAt     DateTime?
+  lastRunAt     DateTime?
+  lastSolvScore Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId, isActive])
+  @@index([projectId, isActive])
+  @@index([isActive, nextRunAt])
+}
+
+// ---------------------------------------------------------------------------
+// Article Studio — published gap articles & AI Domain Data Standard manifest
+// ---------------------------------------------------------------------------
+
+model PublishedGapArticle {
+  id          String   @id @default(cuid())
+  workspaceId String
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  slug        String
+  title       String
+  content     String
+  metadata    Json
+  jsonLd      Json
+  cluster     String?
+  geoLabel    String?
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectId, slug])
+  @@index([workspaceId])
+  @@index([projectId])
+  @@index([projectId, cluster])
+}
+
+/// Public read-only client report links (rank tracker, AI visibility, page audit).
+model ClientShareLink {
+  id              String    @id @default(cuid())
+  shareToken      String    @unique @default(uuid())
+  workspaceId     String
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  /// rank_tracker | ai_visibility | page_audit
+  reportType      String
+  title           String
+  snapshot        Json
+  passwordHash    String?
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  createdByUserId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([workspaceId])
+  @@index([projectId])
+  @@index([reportType])
+}
+
+model DomainProfileManifest {
+  id                   String   @id @default(cuid())
+  projectId            String   @unique
+  project              Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  /// Live manifest served from /.well-known/domain-profile.json
+  manifest             Json
+  manifestVersion      Int      @default(1)
+  /// Pending draft awaiting agency approval before publish.
+  draftManifest        Json?
+  draftManifestVersion Int      @default(0)
+  draftUpdatedAt       DateTime?
+  manifestStatus       String   @default("PUBLISHED")
+  publishedAt          DateTime?
+  publishedByUserId    String?
+  entityType           String   @default("Organization")
+  updatedAt            DateTime @updatedAt
+  createdAt            DateTime @default(now())
+
+  @@index([projectId])
+  @@index([manifestStatus])
+}
+
+model ServiceAreaPageJob {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+
+  coreService   String
+  targetCity    String
+  clientCid     String?
+  centralLat    Float?
+  centralLng    Float?
+
+  status        String   @default("QUEUED") // QUEUED | PROCESSING | COMPLETED | FAILED
+  llmModel      String?
+  htmlContent   String?
+  jsonLdSchema  Json?
+  wordpressPostId Int?
+  wordpressPostUrl String?
+  gbpPostId     String?
+  errorMessage  String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  completedAt DateTime?
+
+  @@index([workspaceId, status])
+  @@index([status, createdAt])
+}
