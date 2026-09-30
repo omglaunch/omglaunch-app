@@ -12,6 +12,8 @@ export default defineConfig({
   engine: "classic",
   datasource: {
     // prisma generate does not connect; placeholder allows Docker/Coolify builds before runtime env exists.
-    url: process.env.DATABASE_URL ?? "file:./prisma/dev.db",
+    url:
+      process.env.DATABASE_URL ??
+      "postgresql://build:build@127.0.0.1:5432/build?schema=public",
   },
 });

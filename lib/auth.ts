@@ -67,7 +67,7 @@ export const auth = betterAuth({
   baseURL: readEnv('BETTER_AUTH_URL') || 'http://localhost:3000',
   trustedOrigins: trustedOrigins.length > 0 ? trustedOrigins : undefined,
   database: prismaAdapter(prisma, {
-    provider: 'sqlite',
+    provider: 'postgresql',
   }),
   socialProviders: isGoogleAuthConfigured()
     ? {
