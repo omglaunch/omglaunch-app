@@ -38,26 +38,36 @@ export default function GuidedTourOrchestrator() {
     if (tourPhase === 'dashboard' && pathname.startsWith('/dashboard')) {
       runningPhaseRef.current = phaseKey;
 
-      void runDashboardTourPhase(() => {
-        runningPhaseRef.current = null;
-        advanceGuidedTourToHubSpoke();
-        router.push('/hub-and-spoke');
-      }).catch(() => {
-        runningPhaseRef.current = null;
-      });
+      const timer = window.setTimeout(() => {
+        void runDashboardTourPhase(() => {
+          runningPhaseRef.current = null;
+          advanceGuidedTourToHubSpoke();
+          router.push('/hub-and-spoke');
+        }).catch(() => {
+          runningPhaseRef.current = null;
+        });
+      }, 600);
 
-      return;
+      return () => {
+        window.clearTimeout(timer);
+      };
     }
 
     if (tourPhase === 'hub-spoke' && pathname.startsWith('/hub-and-spoke')) {
       runningPhaseRef.current = phaseKey;
 
-      void runHubSpokeTourPhase(() => {
-        runningPhaseRef.current = null;
-        completeGuidedTour();
-      }).catch(() => {
-        runningPhaseRef.current = null;
-      });
+      const timer = window.setTimeout(() => {
+        void runHubSpokeTourPhase(() => {
+          runningPhaseRef.current = null;
+          completeGuidedTour();
+        }).catch(() => {
+          runningPhaseRef.current = null;
+        });
+      }, 600);
+
+      return () => {
+        window.clearTimeout(timer);
+      };
     }
   }, [hasSeenTour, isTourActive, tourPhase, pathname, router]);
 

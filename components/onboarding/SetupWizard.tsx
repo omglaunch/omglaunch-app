@@ -109,9 +109,13 @@ export default function SetupWizard({ open }: SetupWizardProps) {
       return;
     }
 
-    startGuidedTour();
     window.dispatchEvent(new Event('credits-updated'));
+    router.push('/dashboard');
     router.refresh();
+    window.setTimeout(() => {
+      startGuidedTour();
+    }, 800);
+    setIsSubmitting(false);
   }
 
   return (
