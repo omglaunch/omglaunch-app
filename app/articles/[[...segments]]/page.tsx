@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
+import { ArticleMarkdown } from '@/components/articles/ArticleMarkdown';
 import {
   buildPublishedGapArticlePath,
   findPublishedGapArticlesBySlug,
@@ -160,7 +160,7 @@ export default async function PublishedArticlePage({ params }: PageProps) {
           </header>
 
           <div className="article-markdown-preview prose prose-slate max-w-none dark:prose-invert">
-            <ReactMarkdown>{article.content}</ReactMarkdown>
+            <ArticleMarkdown content={article.content} />
           </div>
         </div>
       </article>

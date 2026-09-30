@@ -41,7 +41,6 @@ import type {
   HubSpokeMap,
   HubSpokeMapSummary,
 } from '@/lib/hub-spoke-data';
-import { deleteHubSpokeMap, listHubSpokeMaps } from '@/lib/topical-map/client';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/sonner';
 
