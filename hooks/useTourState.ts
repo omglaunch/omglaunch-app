@@ -22,17 +22,24 @@ type Listener = () => void;
 
 const listeners = new Set<Listener>();
 
-function readTourState(): TourState {
-  if (typeof window === 'undefined') {
+/** Cached snapshot so useSyncExternalStore getSnapshot stays referentially stable. */
+let cachedSnapshot: TourState = DEFAULT_STATE;
+let cachedStorageRaw: string | null = null;
+
+function tourStatesEqual(a: TourState, b: TourState): boolean {
+  return (
+    a.hasSeenTour === b.hasSeenTour &&
+    a.isTourActive === b.isTourActive &&
+    a.tourPhase === b.tourPhase
+  );
+}
+
+function parseTourState(raw: string | null): TourState {
+  if (!raw) {
     return DEFAULT_STATE;
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return DEFAULT_STATE;
-    }
-
     const parsed = JSON.parse(raw) as Partial<TourState>;
     return {
       hasSeenTour: Boolean(parsed.hasSeenTour),
@@ -47,12 +54,37 @@ function readTourState(): TourState {
   }
 }
 
+function commitSnapshot(next: TourState, storageRaw: string | null): TourState {
+  if (tourStatesEqual(cachedSnapshot, next)) {
+    cachedStorageRaw = storageRaw;
+    return cachedSnapshot;
+  }
+  cachedSnapshot = next;
+  cachedStorageRaw = storageRaw;
+  return cachedSnapshot;
+}
+
+function readTourState(): TourState {
+  if (typeof window === 'undefined') {
+    return DEFAULT_STATE;
+  }
+
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (raw === cachedStorageRaw) {
+    return cachedSnapshot;
+  }
+
+  return commitSnapshot(parseTourState(raw), raw);
+}
+
 function writeTourState(next: TourState): void {
   if (typeof window === 'undefined') {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  const serialized = JSON.stringify(next);
+  window.localStorage.setItem(STORAGE_KEY, serialized);
+  commitSnapshot(next, serialized);
   listeners.forEach((listener) => listener());
 }
 
@@ -90,6 +122,7 @@ function subscribe(listener: Listener): () => void {
 
   function handleStorage(event: StorageEvent) {
     if (event.key === STORAGE_KEY) {
+      cachedStorageRaw = null;
       listener();
     }
   }

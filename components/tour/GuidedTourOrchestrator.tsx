@@ -30,8 +30,10 @@ export default function GuidedTourOrchestrator() {
     }
 
     if (tourPhase === 'dashboard' && pathname.startsWith('/hub-and-spoke')) {
-      runningPhaseRef.current = null;
-      advanceGuidedTourToHubSpoke();
+      if (runningPhaseRef.current !== 'sync-hub-phase') {
+        runningPhaseRef.current = 'sync-hub-phase';
+        advanceGuidedTourToHubSpoke();
+      }
       return;
     }
 
