@@ -107,12 +107,12 @@
     "typescript": "5.2.2",
     "vaul": "^0.9.9",
     "zod": "^3.23.8",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.14",
+    "prisma": "^6.19.3"
   },
   "devDependencies": {
     "@types/pdfmake": "^0.3.3",
-    "dotenv": "^17.4.2",
-    "prisma": "^6.19.3"
+    "dotenv": "^17.4.2"
   },
   "overrides": {
     "undici": "5.28.4"
