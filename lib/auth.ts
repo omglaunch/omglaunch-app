@@ -38,9 +38,17 @@ function readTrustedOrigins(): string[] {
   return Array.from(origins);
 }
 
+function isNextProductionBuild(): boolean {
+  return process.env.NEXT_PHASE === 'phase-production-build';
+}
+
 const authSecret =
   readEnv('BETTER_AUTH_SECRET') ||
-  (process.env.NODE_ENV === 'production' ? undefined : 'dev-only-insecure-secret');
+  (isNextProductionBuild()
+    ? 'build-time-placeholder-not-used-at-runtime'
+    : process.env.NODE_ENV === 'production'
+      ? undefined
+      : 'dev-only-insecure-secret');
 
 if (!authSecret) {
   throw new Error('BETTER_AUTH_SECRET is not configured.');
