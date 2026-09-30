@@ -1,8 +1,8 @@
 import { format } from 'date-fns';
 import type { Content, TDocumentDefinitions } from 'pdfmake/interfaces';
 import type { AnalysisMetrics } from '@/lib/analysis-data';
-import type { ReportBranding } from '@/lib/projects/client-brand';
-import { formatReportBrandingLines } from '@/lib/projects/client-brand';
+import type { ReportBranding } from '@/lib/projects/client-brand-shared';
+import { formatReportBrandingLines } from '@/lib/projects/client-brand-shared';
 
 const COLORS = {
   primary: '#2563eb',

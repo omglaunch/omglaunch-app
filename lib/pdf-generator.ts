@@ -29,8 +29,8 @@ const COLORS = {
   orangeLight: '#fff7ed',
 } as const;
 
-import type { ReportBranding } from '@/lib/projects/client-brand';
-import { formatReportBrandingLines } from '@/lib/projects/client-brand';
+import type { ReportBranding } from '@/lib/projects/client-brand-shared';
+import { formatReportBrandingLines } from '@/lib/projects/client-brand-shared';
 
 export type AuditPdfInput = {
   url: string;
