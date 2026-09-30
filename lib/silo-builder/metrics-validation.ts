@@ -17,13 +17,14 @@ export function sanitizeKeywordMetrics(
   exactMatch: boolean
 ): ClusterKeywordMetrics {
   if (!exactMatch) {
-    return { searchVolume: null, keywordDifficulty: null };
+    return { searchVolume: null, keywordDifficulty: null, exactMatch: false };
   }
 
   if (isSuspiciousHighVolumeZeroKd(metrics)) {
     return {
       searchVolume: metrics.searchVolume,
       keywordDifficulty: null,
+      exactMatch: metrics.exactMatch,
     };
   }
 

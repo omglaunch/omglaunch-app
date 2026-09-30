@@ -5,13 +5,16 @@ import {
   type KeywordAuditGeoInput,
 } from '@/lib/keyword-audit/geo';
 
-type GeoHint = {
-  pattern: RegExp;
+type GeoHintMatch = {
   country: string;
   city?: string;
 };
 
-const GEO_HINTS: GeoHint[] = [
+type GeoHintPattern = GeoHintMatch & {
+  pattern: RegExp;
+};
+
+const GEO_HINTS: GeoHintPattern[] = [
   { pattern: /\bkuala\s*lumpur\b|\bkualalumpur\b|\bkl\b/, country: 'Malaysia', city: 'Kuala Lumpur' },
   { pattern: /\bpenang\b|\bgeorge\s+town\b/, country: 'Malaysia', city: 'Penang' },
   { pattern: /\bjohor\b|\bjohor\s+bahru\b|\bjb\b/, country: 'Malaysia', city: 'Johor Bahru' },
@@ -32,7 +35,7 @@ const GEO_HINTS: GeoHint[] = [
   { pattern: /\bmumbai\b|\bdelhi\b|\bbangalore\b|\.in(?:\/|$)/, country: 'India' },
 ];
 
-function matchGeoHint(text: string): GeoHint | null {
+function matchGeoHint(text: string): GeoHintMatch | null {
   const normalized = text.trim().toLowerCase();
   if (!normalized) {
     return null;

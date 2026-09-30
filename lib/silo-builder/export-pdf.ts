@@ -16,11 +16,18 @@ const COLORS = {
   indigo: '#3730a3',
 } as const;
 
-type PdfMakeInstance = Awaited<ReturnType<typeof loadPdfMake>>;
+type PdfMakeInstance = {
+  createPdf: (doc: TDocumentDefinitions) => {
+    getBuffer: () => Promise<unknown>;
+    getBlob: () => Promise<Blob>;
+  };
+  vfs?: unknown;
+  fonts?: Record<string, unknown>;
+};
 
 let pdfMakePromise: Promise<PdfMakeInstance> | null = null;
 
-async function loadPdfMake() {
+async function loadPdfMake(): Promise<PdfMakeInstance> {
   const pdfMakeModule = await import('pdfmake/build/pdfmake');
   const pdfMake = (pdfMakeModule as { default?: unknown }).default || pdfMakeModule;
 

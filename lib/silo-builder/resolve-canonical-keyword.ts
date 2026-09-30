@@ -74,7 +74,7 @@ function overlapScore(left: string, right: string): number {
   }
 
   let shared = 0;
-  for (const token of leftTokens) {
+  for (const token of Array.from(leftTokens)) {
     if (rightTokens.has(token)) {
       shared += 1;
     }
