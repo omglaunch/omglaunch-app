@@ -634,8 +634,9 @@ export default function RankTrackerClient() {
         } else if ((data?.queued ?? 0) === 0) {
           toast.info(data?.message ?? 'No keywords need updating right now.');
         } else {
+          const queued = data?.queued ?? 0;
           toast.success(
-            `Checking ${data.queued} keyword${data.queued === 1 ? '' : 's'}…`
+            `Checking ${queued} keyword${queued === 1 ? '' : 's'}…`
           );
         }
       }
